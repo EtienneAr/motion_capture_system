@@ -115,7 +115,7 @@ bool QualisysDriver::init() {
       frame_rate, // nRateArg
       udp_stream_port, // nUDPPort
       nullptr, // nUDPAddr
-      CRTProtocol::cComponent6d);
+      (CRTProtocol::cComponent6d | CRTProtocol::cComponent3dRes | CRTProtocol::cComponent3dNoLabelsRes));
   ROS_INFO("Frame rate: %i frames per second", frame_rate);
   // Calculate covariance matrices
   process_noise.topLeftCorner<6, 6>() =
@@ -213,6 +213,8 @@ void QualisysDriver::handleFrame() {
       handleSubject(i);
     }
   }
+  ROS_INFO("%d labelled marker found", prt_packet->Get3DResidualMarkerCount());
+  ROS_INFO("%d labelled marker found", prt_packet->Get3DNoLabelsResidualMarkerCount());
   return;
 }
 
