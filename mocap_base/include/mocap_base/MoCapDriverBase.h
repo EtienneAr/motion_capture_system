@@ -147,9 +147,6 @@ class Markers {
     Markers(const Markers&);
     Markers& operator=(const Markers&);
 
-    // Prevent cocurrent reading and writing of the class
-    boost::shared_mutex mtx;
-
     // Publisher for the subject
     ros::NodeHandle* nh_ptr;
     std::string parent_frame;

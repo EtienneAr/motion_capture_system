@@ -22,6 +22,7 @@
 #include <Eigen/Geometry>
 #include <tf_conversions/tf_eigen.h>
 #include <mocap_qualisys/QualisysDriver.h>
+#include <geometry_msgs/Point.h>
 
 using namespace std;
 using namespace Eigen;
@@ -66,10 +67,6 @@ bool QualisysDriver::init() {
     ROS_WARN("Invalid UDP port %i, falling back to TCP", int_udp_port);
   }
 
-  if(track_labbeled_markers || track_unlabbeled_markers) {
-    markers.init(&nh, fixed_frame_id);
-  }
-
   // Connecting to the server
   ROS_INFO_STREAM("Connecting to QTM server at: "
       << server_address << ":" << base_port);
@@ -98,6 +95,17 @@ bool QualisysDriver::init() {
     ROS_FATAL_STREAM("Reading 6DOF body settings failed during intialization\n"
                   << "QTM error: " << port_protocol.GetErrorString());
     return false;
+  }
+  // Get 3D marker settings
+  if(track_labbeled_markers || track_unlabbeled_markers) {
+    markers.init(&nh, fixed_frame_id);
+    bool bDataAvailable = false;
+    port_protocol.Read3DSettings(bDataAvailable);
+    if (bDataAvailable == false) {
+      ROS_FATAL_STREAM("Reading 3D marker settings failed during intialization\n"
+                    << "QTM error: " << port_protocol.GetErrorString());
+      return false;
+    }
   }
   // Read system settings
   if (!port_protocol.ReadCameraSystemSettings()){
@@ -223,8 +231,32 @@ void QualisysDriver::handleFrame() {
       handleSubject(i);
     }
   }
-  ROS_INFO("%d labelled marker found", prt_packet->Get3DResidualMarkerCount());
-  ROS_INFO("%d unlabelled marker found", prt_packet->Get3DNoLabelsResidualMarkerCount());
+
+  // Number of labelled markers
+  int labelled_marker_count = prt_packet->Get3DResidualMarkerCount();
+  ROS_INFO("%d labelled marker found", labelled_marker_count);
+  std::vector<mocap_base::Marker> marker_vec;
+  const double packet_time = prt_packet->GetTimeStamp() / 1e6;
+  const double time = start_time_local_ + (packet_time - start_time_packet_);
+  for(int i = 0; i < labelled_marker_count; ++i) {
+    mocap_base::Marker marker;
+    const char* label = port_protocol.Get3DLabelName(i);
+    if(label == nullptr) {
+      ROS_WARN("unable to read label of %d-th labelled marker", i);
+    } else {
+      marker.id = label;
+    }
+    marker.labeled = true;
+    float x, y, z, r;
+    prt_packet->Get3DResidualMarker(i, x, y, z, r);
+    ROS_INFO("labelled marker position (x: %f, y: %f, z: %f, r: %f)", x, y, z, r);
+    marker.position.x = x;
+    marker.position.y = y;
+    marker.position.z = z;
+    marker.residual = r;
+    marker_vec.push_back(marker);
+  }
+  markers.processNewMeasurement(time, marker_vec);
   return;
 }
 
