@@ -214,7 +214,7 @@ void QualisysDriver::handleFrame() {
     }
   }
   ROS_INFO("%d labelled marker found", prt_packet->Get3DResidualMarkerCount());
-  ROS_INFO("%d labelled marker found", prt_packet->Get3DNoLabelsResidualMarkerCount());
+  ROS_INFO("%d unlabelled marker found", prt_packet->Get3DNoLabelsResidualMarkerCount());
   return;
 }
 
