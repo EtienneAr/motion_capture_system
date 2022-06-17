@@ -45,6 +45,11 @@ bool QualisysDriver::init() {
   int int_udp_port;
   nh.param("udp_port", int_udp_port, -1);
   nh.param("qtm_protocol_version", qtm_protocol_version, 18);
+  bool track_labbeled_markers;
+  bool track_unlabbeled_markers;
+  nh.param("track_labbeled_markers", track_labbeled_markers, false);
+  nh.param("track_unlabbeled_markers", track_unlabbeled_markers, false);
+
 
   if (server_address.empty()){
     ROS_FATAL("server_address parameter empty");
@@ -60,6 +65,11 @@ bool QualisysDriver::init() {
   else if (int_udp_port < -1 || int_udp_port > USHRT_MAX){
     ROS_WARN("Invalid UDP port %i, falling back to TCP", int_udp_port);
   }
+
+  if(track_labbeled_markers || track_unlabbeled_markers) {
+    markers.init(&nh, fixed_frame_id);
+  }
+
   // Connecting to the server
   ROS_INFO_STREAM("Connecting to QTM server at: "
       << server_address << ":" << base_port);

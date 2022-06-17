@@ -169,4 +169,16 @@ void Subject::processNewMeasurement(
 
   return;
 }
+
+Markers::Markers():
+  nh_ptr(nullptr),
+  parent_frame("")
+  {};
+
+void Markers::init(ros::NodeHandle* nptr, const std::string& p_frame) {
+  nh_ptr = nptr;
+  parent_frame = p_frame;
+  pub = nh_ptr->advertise<mocap_base::Marker>("markers", 1);
+  return;
+}
 }
