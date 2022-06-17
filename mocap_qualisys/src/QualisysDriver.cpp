@@ -232,28 +232,46 @@ void QualisysDriver::handleFrame() {
     }
   }
 
-  // Number of labelled markers
-  int labelled_marker_count = prt_packet->Get3DResidualMarkerCount();
-  ROS_INFO("%d labelled marker found", labelled_marker_count);
+  // Get markers
   std::vector<mocap_base::Marker> marker_vec;
   const double packet_time = prt_packet->GetTimeStamp() / 1e6;
   const double time = start_time_local_ + (packet_time - start_time_packet_);
-  for(int i = 0; i < labelled_marker_count; ++i) {
+
+  // Number of labeled markers
+  int labeled_marker_count = prt_packet->Get3DResidualMarkerCount();
+  for(int i = 0; i < labeled_marker_count; ++i) {
     mocap_base::Marker marker;
     const char* label = port_protocol.Get3DLabelName(i);
     if(label == nullptr) {
-      ROS_WARN("unable to read label of %d-th labelled marker", i);
+      ROS_WARN("unable to read label of %d-th labeled marker", i);
     } else {
       marker.id = label;
     }
-    marker.labeled = true;
     float x, y, z, r;
     prt_packet->Get3DResidualMarker(i, x, y, z, r);
-    ROS_INFO("labelled marker position (x: %f, y: %f, z: %f, r: %f)", x, y, z, r);
     marker.position.x = x;
     marker.position.y = y;
     marker.position.z = z;
     marker.residual = r;
+    marker.tracked = isfinite(x);
+    marker.labeled = true;
+    marker_vec.push_back(marker);
+  }
+
+  // Number of unlabeled markers
+  int unlabeled_marker_count = prt_packet->Get3DNoLabelsResidualMarkerCount();
+  for(int i = 0; i < unlabeled_marker_count; ++i) {
+    mocap_base::Marker marker;
+    float x, y, z, r;
+    unsigned int id;
+    prt_packet->Get3DNoLabelsResidualMarker(i, x, y, z, id, r);
+    marker.position.x = x;
+    marker.position.y = y;
+    marker.position.z = z;
+    marker.residual = r;
+    marker.tracked = isfinite(x);
+    marker.labeled = false;
+    marker.id = "Unlabeled_" + std::to_string(id);
     marker_vec.push_back(marker);
   }
   markers.processNewMeasurement(time, marker_vec);
