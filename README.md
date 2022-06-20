@@ -51,9 +51,9 @@ Replace `*QTM server address*` with the IP address to your QTM server.
 
      - **`track_6_dofs`** Set to `true` to enable tracking bodies. Default: `true`.
 
-     - **`track_labbeled_markers`** Set to `true` to enable tracking the markers that have been labbeled in QTM (i.e. the one that are parts of a body, an AIM, ...). Default: `false`.
+     - **`track_labeled_markers`** Set to `true` to enable tracking the markers that have been labeled in QTM (i.e. the one that are parts of a body, an AIM, ...). Default: `false`.
 
-     - **`track_unlabbeled_markers`** Set to `true` to enable tracking the markers that have not been labbeled in QTM. Default: `false`.
+     - **`track_unlabeled_markers`** Set to `true` to enable tracking the markers that have not been labeled in QTM. Default: `false`.
 
      - **`fixed_frame_id`** Frame ID for the motion capture system frame of reference (child frame ids are set to the name of the subject). Default: `mocap`
 
@@ -109,13 +109,13 @@ Connects to your local QTM server, and publishes poses, odometry and transforms 
 
    If set to `true`, enable tracking rigid-bodies (6DOFs).
 
-* **`track_labbeled_markers`** (`bool`, default: `false`)
+* **`track_labeled_markers`** (`bool`, default: `false`)
 
-   If set to `true`, enable tracking the markers that have been labbeled in QTM (i.e. the one that are parts of a body, an AIM, ...).
+   If set to `true`, enable tracking the markers that have been labeled in QTM (i.e. the one that are parts of a body, an AIM, ...).
 
-* **`track_unlabbeled_markers`** (`bool`, default: `false`)
+* **`track_unlabeled_markers`** (`bool`, default: `false`)
 
-   If set to `true`, enable tracking the markers that have not been labbeled in QTM.
+   If set to `true`, enable tracking the markers that have not been labeled in QTM.
 
 * **`fixed_frame_id`** (`string`, default: `mocap`)
 

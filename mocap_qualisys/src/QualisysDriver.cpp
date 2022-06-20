@@ -47,11 +47,11 @@ bool QualisysDriver::init() {
   nh.param("udp_port", int_udp_port, -1);
   nh.param("qtm_protocol_version", qtm_protocol_version, 18);
   bool track_6_dofs;
-  bool track_labbeled_markers;
-  bool track_unlabbeled_markers;
+  bool track_labeled_markers;
+  bool track_unlabeled_markers;
   nh.param("track_6_dofs", track_6_dofs, true);
-  nh.param("track_labbeled_markers", track_labbeled_markers, false);
-  nh.param("track_unlabbeled_markers", track_unlabbeled_markers, false);
+  nh.param("track_labeled_markers", track_labeled_markers, false);
+  nh.param("track_unlabeled_markers", track_unlabeled_markers, false);
 
 
   if (server_address.empty()){
@@ -100,7 +100,7 @@ bool QualisysDriver::init() {
     }
   }
   // Get 3D marker settings
-  track_markers = track_labbeled_markers || track_unlabbeled_markers;
+  track_markers = track_labeled_markers || track_unlabeled_markers;
   if(track_markers) {
     markers.init(&nh, fixed_frame_id);
     bDataAvailable = false;
@@ -138,8 +138,8 @@ bool QualisysDriver::init() {
       udp_stream_port, // nUDPPort
       nullptr, // nUDPAddr
       ( (track_6_dofs ? CRTProtocol::cComponent6d : 0x0) |
-        (track_labbeled_markers ? CRTProtocol::cComponent3dRes : 0x0) |
-        (track_unlabbeled_markers ? CRTProtocol::cComponent3dNoLabelsRes : 0x0 )
+        (track_labeled_markers ? CRTProtocol::cComponent3dRes : 0x0) |
+        (track_unlabeled_markers ? CRTProtocol::cComponent3dNoLabelsRes : 0x0 )
       ));
   ROS_INFO("Frame rate: %i frames per second", frame_rate);
   // Calculate covariance matrices
