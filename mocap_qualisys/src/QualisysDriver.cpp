@@ -257,9 +257,9 @@ void QualisysDriver::handleFrame() {
     }
     float x, y, z, r;
     prt_packet->Get3DResidualMarker(i, x, y, z, r);
-    marker.position.x = x;
-    marker.position.y = y;
-    marker.position.z = z;
+    marker.position.x = x / 1000.;
+    marker.position.y = y / 1000.;
+    marker.position.z = z / 1000.;
     marker.residual = r;
     marker.tracked = isfinite(x);
     marker.labeled = true;
@@ -273,9 +273,9 @@ void QualisysDriver::handleFrame() {
     float x, y, z, r;
     unsigned int id;
     prt_packet->Get3DNoLabelsResidualMarker(i, x, y, z, id, r);
-    marker.position.x = x;
-    marker.position.y = y;
-    marker.position.z = z;
+    marker.position.x = x / 1000.;
+    marker.position.y = y / 1000.;
+    marker.position.z = z / 1000.;
     marker.residual = r;
     marker.tracked = isfinite(x);
     marker.labeled = false;
