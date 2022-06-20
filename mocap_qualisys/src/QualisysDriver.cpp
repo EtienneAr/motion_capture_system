@@ -46,8 +46,10 @@ bool QualisysDriver::init() {
   int int_udp_port;
   nh.param("udp_port", int_udp_port, -1);
   nh.param("qtm_protocol_version", qtm_protocol_version, 18);
+  bool track_6_dofs;
   bool track_labbeled_markers;
   bool track_unlabbeled_markers;
+  nh.param("track_6_dofs", track_6_dofs, true);
   nh.param("track_labbeled_markers", track_labbeled_markers, false);
   nh.param("track_unlabbeled_markers", track_unlabbeled_markers, false);
 
@@ -88,18 +90,21 @@ bool QualisysDriver::init() {
   {
     ROS_INFO("Streaming data to UDP port %i", udp_stream_port);
   }
-  // Get 6DOF settings
   bool bDataAvailable = false;
-  port_protocol.Read6DOFSettings(bDataAvailable);
-  if (bDataAvailable == false) {
-    ROS_FATAL_STREAM("Reading 6DOF body settings failed during intialization\n"
-                  << "QTM error: " << port_protocol.GetErrorString());
-    return false;
+  // Get 6DOF settings
+  if(track_6_dofs) {
+    port_protocol.Read6DOFSettings(bDataAvailable);
+    if (bDataAvailable == false) {
+      ROS_FATAL_STREAM("Reading 6DOF body settings failed during intialization\n"
+                    << "QTM error: " << port_protocol.GetErrorString());
+      return false;
+    }
   }
   // Get 3D marker settings
-  if(track_labbeled_markers || track_unlabbeled_markers) {
+  track_markers = track_labbeled_markers || track_unlabbeled_markers;
+  if(track_markers) {
     markers.init(&nh, fixed_frame_id);
-    bool bDataAvailable = false;
+    bDataAvailable = false;
     port_protocol.Read3DSettings(bDataAvailable);
     if (bDataAvailable == false) {
       ROS_FATAL_STREAM("Reading 3D marker settings failed during intialization\n"
@@ -133,7 +138,10 @@ bool QualisysDriver::init() {
       frame_rate, // nRateArg
       udp_stream_port, // nUDPPort
       nullptr, // nUDPAddr
-      (CRTProtocol::cComponent6d | CRTProtocol::cComponent3dRes | CRTProtocol::cComponent3dNoLabelsRes));
+      ( (track_6_dofs ? CRTProtocol::cComponent6d : 0x0) |
+        (track_labbeled_markers ? CRTProtocol::cComponent3dRes : 0x0) |
+        (track_unlabbeled_markers ? CRTProtocol::cComponent3dNoLabelsRes : 0x0 )
+      ));
   ROS_INFO("Frame rate: %i frames per second", frame_rate);
   // Calculate covariance matrices
   process_noise.topLeftCorner<6, 6>() =
@@ -274,7 +282,11 @@ void QualisysDriver::handleFrame() {
     marker.id = "Unlabeled_" + std::to_string(id);
     marker_vec.push_back(marker);
   }
-  markers.processNewMeasurement(time, marker_vec);
+
+  if(track_markers) {
+    markers.processNewMeasurement(time, marker_vec);
+  }
+
   return;
 }
 
