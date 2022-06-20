@@ -68,7 +68,6 @@ bool QualisysDriver::init() {
   else if (int_udp_port < -1 || int_udp_port > USHRT_MAX){
     ROS_WARN("Invalid UDP port %i, falling back to TCP", int_udp_port);
   }
-
   // Connecting to the server
   ROS_INFO_STREAM("Connecting to QTM server at: "
       << server_address << ":" << base_port);

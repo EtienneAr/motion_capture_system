@@ -8,7 +8,6 @@
   <arg name="track_labbeled_markers" default="false"/>
   <arg name="track_unlabbeled_markers" default="false"/>
   <arg name="fixed_frame_id" default="mocap"/>
-  
   <arg name="udp_port" default="0"
     doc="UDP port can be set to -1 to request a TCP stream,
     setting 0 requests a random port, any other positive value 
