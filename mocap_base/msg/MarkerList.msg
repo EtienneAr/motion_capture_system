@@ -1,2 +1,2 @@
-std_msgs/Header header
-mocap_base/Marker[] markers
+std_msgs/Header header # Timestamp and reference frame
+mocap_base/Marker[] markers # List of markers
